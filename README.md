@@ -111,6 +111,8 @@ If you want to play around with different blending modes, you can add a `blend: 
 
 If you need a layers to have a different opacity then you can add the `opacity: 0.7` field to the layersOrder `options` object as well.
 
+If you want to have a layer _ignored_ in the DNA uniqueness check, you can set `bypassDNA: true` in the `options` object. This has the effect of making sure the rest of the traits are unique while not considering the `Background` Layers as traits, for example. The layers _are_ included in the final image.
+
 To use a different metadata attribute name you can add the `displayName: "Awesome Eye Color"` to the `options` object. All options are optional and can be addes on the same layer if you want to.
 
 Here is an example on how you can play around with both filter fields:
@@ -120,7 +122,11 @@ const layerConfigurations = [
   {
     growEditionSizeTo: 5,
     layersOrder: [
-      { name: "Background" },
+      { name: "Background" , {
+        options: {
+          bypassDNA: false;
+        }
+      }},
       { name: "Eyeball" },
       {
         name: "Eye color",
@@ -257,6 +263,21 @@ If you want to change the ratio of the pixelation then you can update the ratio 
 ```js
 const pixelFormat = {
   ratio: 5 / 128,
+};
+```
+
+### Generate pixelated images from collection
+
+In order to export gifs based on the layers created, you just need to set the export on the `gif` object in the `src/config.js` file to `true`. You can also play around with the `repeat`, `quality` and the `delay` of the exported gif.
+
+Setting the `repeat: -1` will produce a one time render and `repeat: 0` will loop forever.
+
+```js
+const gif = {
+  export: true,
+  repeat: 0,
+  quality: 100,
+  delay: 500,
 };
 ```
 

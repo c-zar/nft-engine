@@ -14,7 +14,7 @@ const description = "Remember to replace this description";
 const baseUri = "ipfs://NewUriToReplace";
 
 const solanaMetadata = {
-  symbol: "NOC",
+  symbol: "YC",
   seller_fee_basis_points: 1000, // Define how much % you want from secondary market sales 1000 = 10%
   external_url: "https://www.youtube.com/c/hashlipsnft",
   creators: [
@@ -48,6 +48,13 @@ const debugLogs = false;
 const format = {
   width: 2000,
   height: 2000,
+};
+
+const gif = {
+  export: false,
+  repeat: 0,
+  quality: 100,
+  delay: 500,
 };
 
 const text = {
@@ -85,8 +92,17 @@ const uniqueDnaTorrance = 10000;
 const preview = {
   thumbPerRow: 5,
   thumbWidth: 50,
-  imageRatio: format.width / format.height,
+  imageRatio: format.height / format.width,
   imageName: "preview.png",
+};
+
+const preview_gif = {
+  numberOfImages: 5,
+  order: "ASC", // ASC, DESC, MIXED
+  repeat: 0,
+  quality: 100,
+  delay: 500,
+  imageName: "preview.gif",
 };
 
 module.exports = {
@@ -107,4 +123,6 @@ module.exports = {
   namePrefix,
   network,
   solanaMetadata,
+  gif,
+  preview_gif,
 };
