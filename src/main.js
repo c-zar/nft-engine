@@ -27,10 +27,12 @@ const {
   namePrefix,
   network,
   solanaMetadata,
+  colorDelimiter,
 } = require(path.join(basePath, "/src/config.js"));
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext("2d");
 var metadataList = [];
+var metadataList2 = [];
 var attributesList = [];
 var dnaList = new Set();
 const DNA_DELIMITER = "-";
@@ -62,7 +64,15 @@ const cleanDna = (_str) => {
 
 const cleanName = (_str) => {
   let nameWithoutExtension = _str.slice(0, -4);
-  var nameWithoutWeight = nameWithoutExtension.split(rarityDelimiter).shift();
+  var nameWithoutWeight = nameWithoutExtension.split(rarityDelimiter).shift().split(colorDelimiter).shift();
+  return nameWithoutWeight;
+};
+
+const cleanColor = (_str) => {
+  if (!_str.includes(colorDelimiter))
+    return ""
+  let nameWithoutExtension = _str.slice(0, -4);
+  var nameWithoutWeight = nameWithoutExtension.split(colorDelimiter).pop().split(rarityDelimiter).shift()
   return nameWithoutWeight;
 };
 
@@ -77,28 +87,31 @@ const getElements = (path) => {
         filename: i,
         path: `${path}${i}`,
         weight: getRarityWeight(i),
+        color: cleanColor(i),
       };
     });
 };
 
-const layersSetup = (layersOrder) => {
-  const layers = layersOrder.map((layerObj, index) => ({
-    id: index,
-    elements: getElements(`${layersDir}/${layerObj.name}/`),
-    name:
-      layerObj.options?.["displayName"] != undefined
-        ? layerObj.options?.["displayName"]
-        : layerObj.name,
-    blend:
-      layerObj.options?.["blend"] != undefined
-        ? layerObj.options?.["blend"]
-        : "source-over",
-    opacity:
-      layerObj.options?.["opacity"] != undefined
-        ? layerObj.options?.["opacity"]
-        : 1,
+const layersSetup = async (layersOrder) => {
+  return await Promise.all(layersOrder.map(async (layerObj, index) => {
+    let z = {
+      id: index,
+      elements: getElements(`${layersDir}/${layerObj.name}/`),
+      name:
+        layerObj.options?.["displayName"] != undefined
+          ? layerObj.options?.["displayName"]
+          : layerObj.name,
+      blend:
+        layerObj.options?.["blend"] != undefined
+          ? layerObj.options?.["blend"]
+          : "source-over",
+      opacity:
+        layerObj.options?.["opacity"] != undefined
+          ? layerObj.options?.["opacity"]
+          : 1,
+    }
+    return z;
   }));
-  return layers;
 };
 
 const saveImage = (_editionCount) => {
@@ -158,7 +171,34 @@ const addMetadata = (_dna, _edition) => {
       },
     };
   }
+
+  let solMetadata = {
+    //Added metadata for solana
+    name: tempMetadata.name,
+    symbol: solanaMetadata.symbol,
+    description: tempMetadata.description,
+    //Added metadata for solana
+    seller_fee_basis_points: solanaMetadata.seller_fee_basis_points,
+    image: `image.png`,
+    //Added metadata for solana
+    external_url: solanaMetadata.external_url,
+    edition: _edition,
+    ...extraMetadata,
+    attributes: tempMetadata.attributes,
+    properties: {
+      files: [
+        {
+          uri: "image.png",
+          type: "image/png",
+        },
+      ],
+      category: "image",
+      creators: solanaMetadata.creators,
+    },
+  };
+
   metadataList.push(tempMetadata);
+  metadataList2.push(solMetadata);
   attributesList = [];
 };
 
@@ -168,6 +208,12 @@ const addAttributes = (_element) => {
     trait_type: _element.layer.name,
     value: selectedElement.name,
   });
+  if (selectedElement.color) {
+    attributesList.push({
+      trait_type: `${_element.layer.name} - Color`,
+      value: selectedElement.color,
+    });
+  }
 };
 
 const loadLayerImg = async (_layer) => {
@@ -190,24 +236,24 @@ const drawElement = (_renderObject, _index, _layersLen) => {
   ctx.globalCompositeOperation = _renderObject.layer.blend;
   text.only
     ? addText(
-        `${_renderObject.layer.name}${text.spacer}${_renderObject.layer.selectedElement.name}`,
-        text.xGap,
-        text.yGap * (_index + 1),
-        text.size
-      )
+      `${_renderObject.layer.name}${text.spacer}${_renderObject.layer.selectedElement.name}`,
+      text.xGap,
+      text.yGap * (_index + 1),
+      text.size
+    )
     : ctx.drawImage(
-        _renderObject.loadedImage,
-        0,
-        0,
-        format.width,
-        format.height
-      );
+      _renderObject.loadedImage,
+      0,
+      0,
+      format.width,
+      format.height
+    );
 
   addAttributes(_renderObject);
 };
 
-const constructLayerToDna = (_dna = "", _layers = []) => {
-  let mappedDnaToLayers = _layers.map((layer, index) => {
+const constructLayerToDna = async (_dna = "", _layers = []) => {
+  return await Promise.all(_layers.map((layer, index) => {
     let selectedElement = layer.elements.find(
       (e) => e.id == cleanDna(_dna.split(DNA_DELIMITER)[index])
     );
@@ -217,8 +263,7 @@ const constructLayerToDna = (_dna = "", _layers = []) => {
       opacity: layer.opacity,
       selectedElement: selectedElement,
     };
-  });
-  return mappedDnaToLayers;
+  }))
 };
 
 const isDnaUnique = (_DnaList = new Set(), _dna = "") => {
@@ -255,8 +300,8 @@ const saveMetaDataSingleFile = (_editionCount) => {
   let metadata = metadataList.find((meta) => meta.edition == _editionCount);
   debugLogs
     ? console.log(
-        `Writing metadata for ${_editionCount}: ${JSON.stringify(metadata)}`
-      )
+      `Writing metadata for ${_editionCount}: ${JSON.stringify(metadata)}`
+    )
     : null;
   fs.writeFileSync(
     `${buildDir}/json/${_editionCount}.json`,
@@ -297,7 +342,7 @@ const startCreating = async () => {
     ? console.log("Editions left to create: ", abstractedIndexes)
     : null;
   while (layerConfigIndex < layerConfigurations.length) {
-    const layers = layersSetup(
+    const layers = await layersSetup(
       layerConfigurations[layerConfigIndex].layersOrder
     );
     while (
@@ -305,26 +350,28 @@ const startCreating = async () => {
     ) {
       let newDna = createDna(layers);
       if (isDnaUnique(dnaList, newDna)) {
-        let results = constructLayerToDna(newDna, layers);
+        let results = await constructLayerToDna(newDna, layers);
         let loadedElements = [];
 
-        results.forEach((layer) => {
-          loadedElements.push(loadLayerImg(layer));
-        });
-
-        await Promise.all(loadedElements).then((renderObjectArray) => {
+        await Promise.all(
+          results.map(async (layer) => {
+            loadedElements.push(loadLayerImg(layer));
+          })
+        )
+        await Promise.all(loadedElements).then(async (renderObjectArray) => {
           debugLogs ? console.log("Clearing canvas") : null;
           ctx.clearRect(0, 0, format.width, format.height);
           if (background.generate) {
             drawBackground();
           }
-          renderObjectArray.forEach((renderObject, index) => {
+          await Promise.all(renderObjectArray.map((renderObject, index) => {
             drawElement(
               renderObject,
               index,
               layerConfigurations[layerConfigIndex].layersOrder.length
             );
-          });
+          }))
+
           debugLogs
             ? console.log("Editions left to create: ", abstractedIndexes)
             : null;

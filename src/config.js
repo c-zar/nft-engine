@@ -6,7 +6,7 @@ const basePath = isLocal ? process.cwd() : path.dirname(process.execPath);
 const { MODE } = require(path.join(basePath, "constants/blend_mode.js"));
 const { NETWORK } = require(path.join(basePath, "constants/network.js"));
 
-const network = NETWORK.eth;
+const network = NETWORK.sol;
 
 // General metadata for Ethereum
 const namePrefix = "Your Collection";
@@ -28,15 +28,15 @@ const solanaMetadata = {
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
-    growEditionSizeTo: 5,
+    growEditionSizeTo: 9999,
     layersOrder: [
       { name: "Background" },
-      { name: "Eyeball" },
-      { name: "Eye color" },
-      { name: "Iris" },
-      { name: "Shine" },
-      { name: "Bottom lid" },
-      { name: "Top lid" },
+      { name: "Skin" },
+      { name: "Facial Features" },
+      { name: "Eyes" },
+      { name: "Lips" },
+      { name: "Clothes" },
+      { name: "Hair" },
     ],
   },
 ];
@@ -46,8 +46,8 @@ const shuffleLayerConfigurations = false;
 const debugLogs = false;
 
 const format = {
-  width: 512,
-  height: 512,
+  width: 2000,
+  height: 2000,
 };
 
 const text = {
@@ -78,6 +78,8 @@ const extraMetadata = {};
 
 const rarityDelimiter = "#";
 
+const colorDelimiter = "@";
+
 const uniqueDnaTorrance = 10000;
 
 const preview = {
@@ -95,6 +97,7 @@ module.exports = {
   uniqueDnaTorrance,
   layerConfigurations,
   rarityDelimiter,
+  colorDelimiter,
   preview,
   shuffleLayerConfigurations,
   debugLogs,
