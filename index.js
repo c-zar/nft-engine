@@ -8,7 +8,10 @@ const { startCreating, buildSetup } = require(path.join(
   "/src/main.js"
 ));
 
-(() => {
+(async () => {
+  console.time("Time to finish");
   buildSetup();
-  startCreating();
+  await startCreating();
+  console.timeEnd("Time to finish");
+  process.exit(0)
 })();

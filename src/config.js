@@ -6,10 +6,10 @@ const basePath = isLocal ? process.cwd() : path.dirname(process.execPath);
 const { MODE } = require(path.join(basePath, "constants/blend_mode.js"));
 const { NETWORK } = require(path.join(basePath, "constants/network.js"));
 
-const network = NETWORK.sol;
+const network = NETWORK.eth;
 
 // General metadata for Ethereum
-const namePrefix = "Your Collection";
+const namePrefix = "Sekushi House";
 const description = "Remember to replace this description";
 const baseUri = "ipfs://NewUriToReplace";
 
@@ -26,11 +26,48 @@ const solanaMetadata = {
 };
 
 // If you have selected Solana then the collection starts from 0 automatically
-const layerConfigurations = [
+const pngLayerConfigurations = [
   {
-    growEditionSizeTo: 9999,
+    growEditionSizeTo: 2000,
     layersOrder: [
-      { name: "Background" },
+      // { name: "Background" },
+      { name: "Skin" },
+      { name: "Facial Features" },
+      { name: "Face Tattoos" },
+      { name: "Eyes" },
+      { name: "Lips" },
+      { name: "Clothes" },
+      {
+        name: "Hair",
+        incompatibles:
+        {
+          'Long Wavy Hair With Left Sided Ponytail':
+          {
+            'Face Tattoos': [
+              'left'
+            ]
+          },
+          'Long Hair With Left Sleek Side': {
+            'Face Tattoos': [
+              'left'
+            ]
+          },
+          'Pouf With Right Bow': {
+            'Face Tattoos': [
+              'right'
+            ]
+          },
+        }
+      },
+    ],
+  },
+];
+
+const svgLayerConfigurations = [
+  {
+    growEditionSizeTo: 100,
+    layersOrder: [
+      // { name: "Background" },
       { name: "Skin" },
       { name: "Facial Features" },
       { name: "Eyes" },
@@ -46,8 +83,10 @@ const shuffleLayerConfigurations = false;
 const debugLogs = false;
 
 const format = {
-  width: 2000,
-  height: 2000,
+  width: 1000,
+  height: 1000,
+  type: 'png',
+  // onchain: true
 };
 
 const gif = {
@@ -75,7 +114,7 @@ const pixelFormat = {
 };
 
 const background = {
-  generate: true,
+  generate: false,
   brightness: "80%",
   static: false,
   default: "#000000",
@@ -105,13 +144,15 @@ const preview_gif = {
   imageName: "preview.gif",
 };
 
+
 module.exports = {
   format,
   baseUri,
   description,
   background,
   uniqueDnaTorrance,
-  layerConfigurations,
+  svgLayerConfigurations,
+  pngLayerConfigurations,
   rarityDelimiter,
   colorDelimiter,
   preview,
