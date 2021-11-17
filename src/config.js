@@ -28,9 +28,9 @@ const solanaMetadata = {
 // If you have selected Solana then the collection starts from 0 automatically
 const pngLayerConfigurations = [
   {
-    growEditionSizeTo: 2000,
+    growEditionSizeTo: 1000,
     layersOrder: [
-      // { name: "Background" },
+      { name: "Background" },
       { name: "Skin" },
       { name: "Facial Features" },
       { name: "Face Tattoos" },

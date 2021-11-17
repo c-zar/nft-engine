@@ -183,7 +183,7 @@ const addMetadata = (_dna, _edition, attributesList, base64 = null) => {
 
   // metadataList[index] = ethMetadata;
   // metadataList2.push(solMetadata);
-  jsonSaver.push({ 'index': _edition, 'metadata': network == NETWORK.sol ? solMetadata : ethMetadata });
+  jsonSaver.push({ 'index': _edition, 'metadata': network == NETWORK.sol ? solMetadata : ethMetadata }, () => { ii++ });
   saveMetaDataSingleFilev2(_edition, network == NETWORK.sol ? solMetadata : ethMetadata);
 };
 
@@ -216,7 +216,6 @@ const jsonSaver = async.queue((task, callback) => {
           ',\n', { 'flag': 'a' })
         // stream.write(',\n');
       }
-      ii++
       callback()
     } else if (ii < (total + (network == NETWORK.sol ? 0 : 1))) {
       setTimeout(checkFlag, 100);
@@ -226,7 +225,7 @@ const jsonSaver = async.queue((task, callback) => {
   }
   checkFlag()
   // saveMetaDataSingleFilev2(task.index, task.metadata);
-}, numProcesses * 2 + 1)
+}, numProcesses * 3)
 
 const loadImagetoMap = async (pp) => {
   return new Promise(async (resolve) => {
