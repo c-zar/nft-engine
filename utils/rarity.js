@@ -26,6 +26,7 @@ layerConfigurations.forEach((config) => {
 
   layers.forEach((layer) => {
     // get elements for each layer
+    var nameToidx = {};
     const ss = new Set();
     let elementsForLayer = [];
     let colorForLayer = [];
@@ -35,7 +36,7 @@ layerConfigurations.forEach((config) => {
       if (!ss.has(element.name)) {
         elementsForLayer.push({
           trait: element.name,
-          chance: element.weight.toFixed(0),
+          // chance: element.weight.toFixed(0),
           occurrence: 0, // initialize at 0
         });
         ss.add(element.name)
@@ -44,7 +45,7 @@ layerConfigurations.forEach((config) => {
         if (!ss.has(element.color)) {
           colorForLayer.push({
             trait: element.color,
-            chance: element.weight.toFixed(0),
+            // chance: element.weight.toFixed(0),
             occurrence: 0, // initialize at 0
           });
           ss.add(element.color)
@@ -113,7 +114,7 @@ for (var layer in rarityData) {
 // print out rarity data
 const tt = [];
 for (var layer in rarityData) {
-  console.log(`Trait type: ${layer} ${layer.length}`);
+  console.log(`Trait type: ${layer} ${rarityData[layer].length}`);
   tt.push(rarityData[layer].length)
   console.table(rarityData[layer])
   // for (var trait in rarityData[layer]) {

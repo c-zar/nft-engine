@@ -28,15 +28,46 @@ const solanaMetadata = {
 // If you have selected Solana then the collection starts from 0 automatically
 const pngLayerConfigurations = [
   {
-    growEditionSizeTo: 2000,
+    growEditionSizeTo: 1000,
     layersOrder: [
-      // { name: "Background" },
+      { name: "Background" },
       { name: "Skin" },
       { name: "Facial Features" },
       { name: "Face Tattoos" },
       { name: "Eyes" },
       { name: "Lips" },
-      { name: "Clothes" },
+      { name: "Neck Tattoos" },
+      {
+        name: "Clothes",
+        incompatibles:
+        {
+          'Bow':
+          {
+            'Neck Tattoos': [
+            ]
+          },
+          'Cat Hole':
+          {
+            'Neck Tattoos': [
+            ]
+          },
+          'Mesh':
+          {
+            'Neck Tattoos': [
+            ]
+          },
+          'Open Shoulder':
+          {
+            'Neck Tattoos': [
+            ]
+          },
+          'School Girl':
+          {
+            'Neck Tattoos': [
+            ]
+          },
+        },
+      },
       {
         name: "Hair",
         incompatibles:

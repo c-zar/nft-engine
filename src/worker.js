@@ -59,7 +59,7 @@ const getRarityWeight = (_str) => {
 
 const cleanDna = (_str) => {
     const withoutOptions = removeQueryStrings(_str)
-    return Number(withoutOptions.split(":").shift());
+    return withoutOptions.split(":").shift();
 };
 
 const cleanName = (_str) => {
@@ -152,6 +152,9 @@ const loadLayerImg = async (_layer) => {
             loadedLayersMap.set(_layer.selectedElement.path, image)
             resolve({ layer: _layer, loadedImage: image });
         }
+
+        // image = await loadImage(`${_layer.selectedElement.path}`);
+        // resolve({ layer: _layer, loadedImage: image });
     });
 };
 
@@ -198,7 +201,7 @@ const drawElement = (_renderObject, _index, _layersLen, ctx, addAttributes) => {
 const constructLayerToDna = async (_dna = "", _layers = []) => {
     return await Promise.all(_layers.map(async (layer, index) => {
         return new Promise((resolve) => {
-            let selectedElement = layer.elements[cleanDna(_dna.split(DNA_DELIMITER)[index])];
+            let selectedElement = layer.elements[layer.nameToidx[cleanDna(_dna.split(DNA_DELIMITER)[index])]];
             resolve({
                 name: layer.name,
                 blend: layer.blend,
