@@ -28,7 +28,8 @@
     "gif-encoder-2": "^1.0.5",
     "gifencoder": "^2.0.1",
     "sha1": "^1.1.1",
-    "sharp": "^0.29.2"
+    "sharp": "^0.29.2",
+    "skia-canvas": "^0.9.27"
   },
   "devDependencies": {}
 }

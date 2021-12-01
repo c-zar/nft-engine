@@ -4,10 +4,8 @@ const basePath = isLocal ? process.cwd() : Path.dirname(process.execPath);
 const { NETWORK } = require(Path.join(basePath, "constants/network.js"));
 const fs = require("fs");
 const sha1 = require(Path.join(basePath, "/node_modules/sha1"));
-const { createCanvas, loadImage } = require(Path.join(
-    basePath,
-    "/node_modules/canvas"
-));
+const { Canvas, loadImage } = require(Path.join(basePath, '/node_modules/skia-canvas'));
+
 const buildDir = Path.join(basePath, "/build");
 const layersDir = Path.join(basePath, "/layers");
 const {
@@ -30,7 +28,6 @@ const {
 } = require(Path.join(basePath, "/src/config.js"));
 const layerConfigurations = pngLayerConfigurations
 const async = require('async');
-const { type } = require("os");
 
 const DNA_DELIMITER = "-";
 
@@ -179,6 +176,7 @@ const addText = (_sig, x, y, size, ctx) => {
 
 const drawElement = (_renderObject, _index, _layersLen, ctx, addAttributes) => {
     ctx.globalAlpha = _renderObject.layer.opacity;
+    ctx.filter = (_renderObject.layer.filter || 'none')
     ctx.globalCompositeOperation = _renderObject.layer.blend;
     text.only
         ? addText(
@@ -202,12 +200,10 @@ const constructLayerToDna = async (_dna = "", _layers = []) => {
     return await Promise.all(_layers.map(async (layer, index) => {
         return new Promise((resolve) => {
             let selectedElement = layer.elements[layer.nameToidx[cleanDna(_dna.split(DNA_DELIMITER)[index])]];
-            resolve({
-                name: layer.name,
-                blend: layer.blend,
-                opacity: layer.opacity,
-                selectedElement: selectedElement,
-            });
+            z = Object.assign({}, { selectedElement: selectedElement }, layer)
+            resolve(
+                z
+            );
         });
     }))
 };
@@ -265,7 +261,7 @@ const saveMetaDataSingleFilev2 = (_editionCount, metadata) => {
 };
 
 const imageSaver = async.queue(async.asyncify(async (task) => {
-    saveImageV2(task.index, task.canvas.toBuffer('image/png'));
+    saveImageV2(task.index, task.canvas);
 }), 2)
 
 const doWork = async (task) => {
@@ -273,7 +269,7 @@ const doWork = async (task) => {
     const newDna = task.newDna
     const _index = task.idx
     // const callback = task.callback
-    const canvas = createCanvas(format.width, format.height);
+    const canvas = new Canvas(format.width, format.height);
     const ctx = canvas.getContext("2d");
     const layers = layerSetup[configIndex]
     let attributesList = [];
@@ -318,9 +314,10 @@ const doWork = async (task) => {
                         trait_type: _element.layer.name,
                         value: selectedElement.name,
                     });
+                    let cName = `${_element.layer.name} - Color`
                     if (selectedElement.color) {
                         attributesList.push({
-                            trait_type: `${_element.layer.name} - Color`,
+                            trait_type: `${_element.layer.colorName || cName}`,
                             value: selectedElement.color,
                         });
                     }
@@ -347,7 +344,7 @@ const doWork = async (task) => {
     if (format.onchain)
         return [newDna, _index, attributesList, `data:image/png;base64,` + canvas.toBuffer().toString('base64')]
     else {
-        imageSaver.push({ 'index': _index, 'canvas': canvas });
+        imageSaver.push({ 'index': _index, 'canvas': await canvas.png });
         return [newDna, _index, attributesList]
     }
 };

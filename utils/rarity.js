@@ -71,9 +71,10 @@ layerConfigurations.forEach((config) => {
       // add elements for each layer to chart
       rarityData[layerName] = elementsForLayer;
     }
+    let cName = `${layer.name} - Color`
     if (!rarityData.includes(`${layer.name} - Color`) && colorForLayer.length > 0) {
       // add elements for each layer to chart
-      rarityData[`${layer.name} - Color`] = colorForLayer;
+      rarityData[`${layer.options.colorName || cName}`] = colorForLayer;
     }
   });
 });

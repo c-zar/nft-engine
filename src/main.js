@@ -10,12 +10,10 @@ const sha1 = require(Path.join(basePath, "/node_modules/sha1"));
 const async = require('async')
 const { time } = require("console");
 const { finished } = require('stream');
-const { createCanvas, loadImage } = require(Path.join(
-  basePath,
-  "/node_modules/canvas"
-));
+const { Canvas, loadImage } = require(Path.join(basePath, '/node_modules/skia-canvas'));
 const buildDir = Path.join(basePath, "/build");
 const layersDir = Path.join(basePath, "/layers");
+const dnaDir = Path.join(basePath, "/.DNA");
 var total;
 const {
   format,
@@ -66,6 +64,17 @@ const buildSetup = () => {
   fs.mkdirSync(Path.join(buildDir, "/images"));
   if (gif.export) {
     fs.mkdirSync(Path.join(buildDir, "/gifs"));
+  }
+  try {
+    fs.readdirSync(dnaDir)
+      .map((i) => {
+        JSON.parse(fs.readFileSync(Path.join(dnaDir, i)))
+          .forEach(
+            item => dnaSet.add(item)
+          )
+      });
+  } catch (err) {
+    throw err
   }
 };
 
@@ -129,6 +138,10 @@ const layersSetup = async (layersOrder) => {
       elements: getElements(Path.join(layersDir, layerObj.name), name, nameToidx),
       nameToidx: nameToidx,
       name: name,
+    }
+    z = Object.assign({}, z, layerObj.options)
+    z = Object.assign({},
+      z, {
       blend:
         layerObj.options?.["blend"] != undefined
           ? layerObj.options?.["blend"]
@@ -142,7 +155,7 @@ const layersSetup = async (layersOrder) => {
           ? layerObj.options?.["bypassDNA"]
           : false
     }
-
+    )
     incompatibles[z.name] = layerObj.incompatibles
     // await Promise.all(z.elements.map(async (element) => {
     //   await loadImagetoMap(element.path)
@@ -272,11 +285,12 @@ const filterDNAOptions = (_dna) => {
       return true
     }
     const options = querystring[1].split("&").reduce((r, setting) => {
-      const keyPairs = setting.split("=");
+      const string = setting.split("?").pop();
+      const keyPairs = string.split("=");
       return { ...r, [keyPairs[0]]: keyPairs[1] };
     }, []);
 
-    return options.bypassDNA
+    return options.bypassDNA.toLowerCase() === 'false'
   })
 
   return filteredDNA.join(DNA_DELIMITER)
@@ -505,6 +519,11 @@ const startCreating = async () => {
     layerConfigIndex++;
   }
   await doWork.drain()
+
+  fs.writeFileSync(
+    `${buildDir}/DNA.json`,
+    JSON.stringify([...dnaSet])
+  );
 
   // async function checkFlag() {
   //   if (ii == lastIndex) {

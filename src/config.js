@@ -28,48 +28,45 @@ const solanaMetadata = {
 // If you have selected Solana then the collection starts from 0 automatically
 const pngLayerConfigurations = [
   {
-    growEditionSizeTo: 1000,
+    growEditionSizeTo: 100,
     layersOrder: [
-      { name: "Background" },
+      {
+        name: "Background",
+        options: {
+          bypassDNA: true,
+          filter: 'blur(20px) saturate(100%)',
+        }
+      },
       { name: "Skin" },
       { name: "Facial Features" },
-      { name: "Face Tattoos" },
-      { name: "Eyes" },
-      { name: "Lips" },
-      { name: "Neck Tattoos" },
       {
-        name: "Clothes",
-        incompatibles:
-        {
-          'Bow':
-          {
-            'Neck Tattoos': [
-            ]
-          },
-          'Cat Hole':
-          {
-            'Neck Tattoos': [
-            ]
-          },
-          'Mesh':
-          {
-            'Neck Tattoos': [
-            ]
-          },
-          'Open Shoulder':
-          {
-            'Neck Tattoos': [
-            ]
-          },
-          'School Girl':
-          {
-            'Neck Tattoos': [
-            ]
-          },
+        name: "Face Tattoos", options: {
+          opacity: 0.8,
+        },
+      },
+      {
+        name: "Eyes", options: {
+          // opacity: 0.9,
+          filter: ''
+        },
+      },
+      {
+        name: "Lips", options: {
+          opacity: 0.8,
+        },
+      },
+      {
+        name: "Clothes", options: {
+          filter: 'saturate(80%)'
         },
       },
       {
         name: "Hair",
+        options: {
+          filter: 'saturate(80%)',
+          displayName: 'Hair Style',
+          colorName: 'Hair - Color'
+        },
         incompatibles:
         {
           'Long Wavy Hair With Left Sided Ponytail':
